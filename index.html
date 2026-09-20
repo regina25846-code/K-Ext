@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-Ext — 브라우저 확장 프로그램 설치 도우미</title>
+<meta name="description" content="받으신 확장 프로그램 파일을 끌어다 놓으면 설치와 업데이트가 끝납니다. 크롬·웨일·엣지·브레이브용 확장 프로그램 설치 도우미 K-Ext 다운로드, 설치 방법, 쓰는 법 안내.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>*{box-sizing:border-box}html,body{margin:0;padding:0}</style>
+</head>
+<body>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   K-SERIES DOWNLOAD PAGE — "Spatial Light Glass"
+   K-시리즈 공통 기준판. 앱마다 --tint / --tint-deep / --tint-ink 세 토큰과 본문만 바뀐다.
+   Type: Pretendard 400/600/700/800/900 (jsDelivr CDN)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Tokens: ground / glass / ink ─────────────────────────────── */
+:root{
+  color-scheme:light dark;
+
+  --ground:#EDF0F5;
+  --ground-2:#E4E7EF;
+  --mesh-cool:rgba(140,160,255,.24);
+  --mesh-warm:rgba(255,168,205,.30);
+  --mesh-lift:rgba(255,255,255,.95);
+
+  --glass:rgba(255,255,255,.60);
+  --glass-solid:rgba(255,255,255,.82);
+  --glass-inner:rgba(255,255,255,.48);
+  --glass-line:rgba(18,28,54,.10);
+  --glass-hi:rgba(255,255,255,.92);
+  --hairline:rgba(18,28,54,.09);
+
+  --ink:#141922;
+  --ink-2:#525B6B;
+  --ink-3:#8791A2;
+
+  --prism-1:#F0819F;
+  --prism-2:#B05BD0;
+  --prism-3:#5FC7E6;
+  --prism-a:.55;
+
+  --sh-near:0 1px 2px rgba(18,28,54,.08);
+  --sh-mid:0 10px 24px -12px rgba(18,28,54,.24);
+  --sh-far:0 40px 70px -34px rgba(18,28,54,.38);
+  --sh-lift:0 60px 90px -40px rgba(18,28,54,.44);
+  --sh-inset:inset 0 1px 0 var(--glass-hi);
+
+  --grid-line:rgba(20,30,58,.045);
+
+  --sans:'Pretendard','Pretendard Variable',system-ui,-apple-system,'Malgun Gothic',sans-serif;
+  --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+
+  --pane-w:980px;
+
+  /* ── per-app brand tint (K-Ext: 로고 그린) ── */
+  --tint:#3F8A14;
+  --tint-deep:#2E6A0E;
+  --tint-ink:#3F8A14;              /* 밝은 바닥 위에서 읽히는 잉크 */
+  --tint-soft:rgba(63,138,20,.10);
+  --tint-glow:rgba(63,138,20,.32);
+  --tint-grad:linear-gradient(135deg,#B5E36A 0%,#3F8A14 46%,#2E6A0E 100%);
+}
+
+/* dark: system preference */
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0C0F16;
+    --ground-2:#161320;
+    --mesh-cool:rgba(90,110,230,.30);
+    --mesh-warm:rgba(214,74,124,.26);
+    --mesh-lift:rgba(255,255,255,.05);
+
+    --glass:rgba(255,255,255,.055);
+    --glass-solid:rgba(255,255,255,.088);
+    --glass-inner:rgba(255,255,255,.045);
+    --glass-line:rgba(255,255,255,.13);
+    --glass-hi:rgba(255,255,255,.14);
+    --hairline:rgba(255,255,255,.10);
+
+    --ink:#EEF1F7;
+    --ink-2:#A5AEBE;
+    --ink-3:#737D91;
+
+    --prism-a:.75;
+
+    --sh-near:0 1px 2px rgba(0,0,0,.5);
+    --sh-mid:0 12px 28px -14px rgba(0,0,0,.72);
+    --sh-far:0 44px 78px -34px rgba(0,0,0,.85);
+    --sh-lift:0 64px 100px -42px rgba(0,0,0,.9);
+    --grid-line:rgba(255,255,255,.035);
+
+    --tint-ink:#B5E36A;
+    --tint-soft:rgba(124,201,74,.14);
+    --tint-glow:rgba(63,138,20,.42);
+  }
+}
+/* dark: explicit override (toggle wins over the media query) */
+:root[data-theme="dark"]{
+  --ground:#0C0F16; --ground-2:#161320;
+  --mesh-cool:rgba(90,110,230,.30); --mesh-warm:rgba(214,74,124,.26); --mesh-lift:rgba(255,255,255,.05);
+  --glass:rgba(255,255,255,.055); --glass-solid:rgba(255,255,255,.088);
+  --glass-inner:rgba(255,255,255,.045); --glass-line:rgba(255,255,255,.13);
+  --glass-hi:rgba(255,255,255,.14); --hairline:rgba(255,255,255,.10);
+  --ink:#EEF1F7; --ink-2:#A5AEBE; --ink-3:#737D91; --prism-a:.75;
+  --sh-near:0 1px 2px rgba(0,0,0,.5);
+  --sh-mid:0 12px 28px -14px rgba(0,0,0,.72);
+  --sh-far:0 44px 78px -34px rgba(0,0,0,.85);
+  --sh-lift:0 64px 100px -42px rgba(0,0,0,.9);
+  --grid-line:rgba(255,255,255,.035);
+  --tint-ink:#B5E36A; --tint-soft:rgba(124,201,74,.14); --tint-glow:rgba(63,138,20,.42);
+}
+/* light: explicit override */
+:root[data-theme="light"]{
+  --ground:#EDF0F5; --ground-2:#E4E7EF;
+  --mesh-cool:rgba(140,160,255,.24); --mesh-warm:rgba(255,168,205,.30); --mesh-lift:rgba(255,255,255,.95);
+  --glass:rgba(255,255,255,.60); --glass-solid:rgba(255,255,255,.82);
+  --glass-inner:rgba(255,255,255,.48); --glass-line:rgba(18,28,54,.10);
+  --glass-hi:rgba(255,255,255,.92); --hairline:rgba(18,28,54,.09);
+  --ink:#141922; --ink-2:#525B6B; --ink-3:#8791A2; --prism-a:.55;
+  --sh-near:0 1px 2px rgba(18,28,54,.08);
+  --sh-mid:0 10px 24px -12px rgba(18,28,54,.24);
+  --sh-far:0 40px 70px -34px rgba(18,28,54,.38);
+  --sh-lift:0 60px 90px -40px rgba(18,28,54,.44);
+  --grid-line:rgba(20,30,58,.045);
+  --tint-ink:#3F8A14; --tint-soft:rgba(63,138,20,.10); --tint-glow:rgba(63,138,20,.32);
+}
+
+/* ── Base ─────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16.5px;
+  line-height:1.68;
+  font-weight:400;
+  letter-spacing:-.008em;
+  word-break:keep-all;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+  min-height:100vh;
+}
+a{color:inherit}
+img{max-width:100%}
+:focus-visible{outline:2px solid var(--tint);outline-offset:3px;border-radius:8px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ── Wallpaper + studio lamp ──────────────────────────────────── */
+.wallpaper{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(1100px 720px at 82% -14%, var(--mesh-warm), transparent 62%),
+    radial-gradient(900px 620px at 4% 4%, var(--mesh-lift), transparent 58%),
+    radial-gradient(1000px 820px at 14% 106%, var(--mesh-cool), transparent 60%),
+    linear-gradient(172deg, var(--ground) 0%, var(--ground-2) 100%);
+}
+.wallpaper::after{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/100% 74px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/74px 100%;
+  -webkit-mask-image:radial-gradient(120% 92% at 50% 0%, #000 18%, transparent 76%);
+  mask-image:radial-gradient(120% 92% at 50% 0%, #000 18%, transparent 76%);
+}
+.lamp{
+  position:fixed;z-index:0;pointer-events:none;
+  width:760px;height:760px;left:0;top:0;margin:-380px 0 0 -380px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,.55), transparent 66%);
+  opacity:0;transition:opacity .6s ease;
+  will-change:transform;mix-blend-mode:soft-light;
+}
+@media (prefers-color-scheme:dark){.lamp{background:radial-gradient(circle, rgba(255,170,210,.26), transparent 66%)}}
+:root[data-theme="dark"] .lamp{background:radial-gradient(circle, rgba(255,170,210,.26), transparent 66%)}
+:root[data-theme="light"] .lamp{background:radial-gradient(circle, rgba(255,255,255,.55), transparent 66%)}
+
+.shell{position:relative;z-index:1}
+
+/* ── Glass primitive ──────────────────────────────────────────── */
+.glass{
+  position:relative;
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(26px) saturate(175%);
+  backdrop-filter:blur(26px) saturate(175%);
+  border-radius:24px;
+  box-shadow:var(--sh-inset), var(--sh-near), var(--sh-mid), var(--sh-far);
+}
+.glass::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  padding:1px;
+  background:linear-gradient(135deg,
+    color-mix(in srgb, var(--prism-1) 70%, transparent) 0%,
+    var(--glass-line) 26%,
+    var(--glass-line) 62%,
+    color-mix(in srgb, var(--prism-3) 58%, transparent) 100%);
+  opacity:var(--prism-a);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+}
+
+/* shared width rhythm */
+.wrap{width:min(var(--pane-w), calc(100% - 32px));margin-inline:auto}
+
+/* ── Dock (sticky top bar) ────────────────────────────────────── */
+.dock{
+  position:sticky;top:14px;z-index:40;
+  margin-top:14px;
+  display:flex;align-items:center;gap:14px;
+  padding:9px 10px 9px 18px;
+  border-radius:999px;
+}
+.dock-mark{
+  display:flex;align-items:center;gap:9px;
+  font-family:var(--mono);
+  font-size:11px;font-weight:700;letter-spacing:.2em;
+  color:var(--ink-2);text-transform:uppercase;
+  text-decoration:none;white-space:nowrap;
+}
+.dock-mark .ico{width:22px;height:22px;flex:none;filter:drop-shadow(0 2px 4px var(--tint-glow))}
+.dock-nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.dock-nav::-webkit-scrollbar{display:none}
+.dock-nav a{
+  font-size:13px;font-weight:700;color:var(--ink-2);
+  text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap;
+  transition:color .18s ease, background .18s ease;
+}
+.dock-nav a:hover{color:var(--ink);background:var(--glass-inner)}
+.toggle{
+  flex:none;width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;cursor:pointer;
+  border:1px solid var(--glass-line);
+  background:var(--glass-inner);color:var(--ink-2);
+  transition:color .18s ease, transform .18s ease, background .18s ease;
+}
+.toggle:hover{color:var(--ink);transform:rotate(-18deg);background:var(--glass-solid)}
+.toggle svg{width:16px;height:16px;display:block}
+.toggle .sun{display:none}
+@media (prefers-color-scheme:dark){.toggle .sun{display:block}.toggle .moon{display:none}}
+:root[data-theme="dark"] .toggle .sun{display:block}
+:root[data-theme="dark"] .toggle .moon{display:none}
+:root[data-theme="light"] .toggle .sun{display:none}
+:root[data-theme="light"] .toggle .moon{display:block}
+
+/* ═══ 1. MASTHEAD — 로고 + 앱 이름 ════════════════════════════ */
+.masthead{padding:clamp(56px,8.5vw,104px) 0 0;text-align:center}
+.mark-well{position:relative;display:inline-grid;place-items:center;margin-bottom:clamp(28px,3.8vw,40px)}
+.mark-well::before{
+  content:"";position:absolute;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle, var(--tint-glow) 0%, transparent 68%);
+  opacity:.7;filter:blur(14px);
+}
+.mark-well::after{
+  content:"";position:absolute;bottom:-14px;width:clamp(80px,10vw,104px);height:18px;
+  border-radius:50%;background:radial-gradient(ellipse, var(--tint-deep) 0%, transparent 72%);
+  opacity:.30;filter:blur(6px);
+}
+.mark-badge{
+  position:relative;
+  width:clamp(120px,16vw,156px);height:clamp(120px,16vw,156px);
+  border-radius:clamp(30px,4vw,38px);
+  display:grid;place-items:center;
+  background:
+    linear-gradient(155deg, rgba(255,255,255,.30), transparent 40%),
+    color-mix(in srgb, var(--tint) 10%, var(--glass-solid));
+  -webkit-backdrop-filter:blur(16px) saturate(200%);
+  backdrop-filter:blur(16px) saturate(200%);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,.55),
+    inset 0 -10px 20px -14px var(--tint-deep),
+    0 1px 2px rgba(18,28,54,.08),
+    0 24px 40px -16px var(--tint-deep),
+    0 46px 70px -34px rgba(18,28,54,.55);
+  transition:transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s cubic-bezier(.22,1,.36,1);
+}
+.mark-badge:hover{transform:translateY(-7px) rotate(-2.5deg)}
+.mark-badge .ico{
+  width:84%;height:84%;display:block;border-radius:22%;
+  box-shadow:0 10px 22px -10px rgba(18,28,54,.38), 0 2px 6px rgba(18,28,54,.16);
+  position:relative;
+}
+.mark-badge::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(128deg, rgba(255,255,255,.9) 0%, rgba(255,255,255,.28) 18%, transparent 42%);
+  mix-blend-mode:overlay;opacity:.85;
+}
+
+.eyebrow{
+  font-family:var(--mono);
+  font-size:11.5px;font-weight:700;letter-spacing:.42em;
+  color:var(--ink-3);margin:0 0 16px;padding-left:.42em;
+}
+.masthead h1{
+  font-weight:900;
+  font-size:clamp(44px,7.4vw,78px);
+  line-height:1.02;letter-spacing:-.045em;
+  margin:0 0 14px;
+}
+.masthead h1 span{
+  background:var(--tint-grad);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+}
+.tagline{
+  font-size:clamp(18px,2.2vw,22px);font-weight:700;letter-spacing:-.028em;
+  color:var(--ink);margin:0 0 16px;
+}
+.lede{
+  max-width:50ch;margin:0 auto;
+  font-size:16.5px;line-height:1.85;color:var(--ink-2);
+  text-wrap:balance;
+}
+
+/* ═══ 2. 버전 — release strip ═════════════════════════════════ */
+.release-strip{
+  display:inline-flex;align-items:stretch;flex-wrap:wrap;justify-content:center;
+  margin:clamp(32px,4.4vw,46px) auto 0;
+  border-radius:18px;overflow:hidden;
+}
+.release-strip div{
+  padding:15px clamp(18px,2.8vw,30px);
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  white-space:nowrap;
+}
+.release-strip div + div{box-shadow:inset 1px 0 0 var(--hairline)}
+.release-strip .k{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--ink-2);
+}
+.release-strip b{
+  font-size:17px;font-weight:800;letter-spacing:-.02em;color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.release-strip b.hot{color:var(--tint-ink)}
+
+/* ── Section chrome (재사용 단위) ─────────────────────────────── */
+.sec{padding:clamp(56px,8vw,96px) 0 0;scroll-margin-top:88px}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin:0 0 clamp(22px,3vw,30px)}
+.sec-num{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.2em;
+  color:var(--tint-ink);flex:none;
+  font-variant-numeric:tabular-nums;
+}
+.sec-head h2{
+  font-size:clamp(26px,3.6vw,36px);font-weight:900;
+  letter-spacing:-.04em;line-height:1.12;margin:0;
+}
+.sec-head .rule{flex:1;height:1px;background:var(--hairline);min-width:16px}
+.sec-head .pill{
+  flex:none;font-size:12px;font-weight:700;letter-spacing:-.01em;
+  color:var(--tint-ink);background:var(--tint-soft);
+  border:1px solid color-mix(in srgb, var(--tint) 26%, transparent);
+  padding:4px 12px;border-radius:999px;white-space:nowrap;
+}
+.panel{padding:clamp(26px,3.6vw,40px) clamp(24px,3.6vw,42px);border-radius:28px}
+
+/* ═══ 3. 다운로드 ═════════════════════════════════════════════ */
+.dl-row{display:flex;flex-wrap:wrap;gap:14px}
+.btn{
+  display:inline-flex;align-items:center;gap:12px;
+  text-decoration:none;
+  font-size:16px;font-weight:800;letter-spacing:-.022em;
+  padding:17px 28px;border-radius:16px;
+  transition:transform .2s ease, box-shadow .26s ease, color .2s ease;
+}
+.btn svg{width:19px;height:19px;flex:none;transition:transform .24s ease}
+.btn .sub{
+  font-family:var(--mono);font-size:11px;font-weight:700;opacity:.72;
+  letter-spacing:.04em;font-variant-numeric:tabular-nums;
+}
+.btn-primary{
+  color:#fff;
+  background:var(--tint-grad);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.34), 0 2px 4px rgba(18,28,54,.12), 0 16px 30px -12px var(--tint-deep);
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.34), 0 2px 4px rgba(18,28,54,.12), 0 24px 42px -12px var(--tint-deep)}
+.btn-primary:hover svg{transform:translateY(3px)}
+.btn-ghost{
+  color:var(--ink);
+  background:var(--glass-solid);
+  border:1px solid var(--glass-line);
+  box-shadow:var(--sh-inset), var(--sh-near), 0 10px 22px -12px rgba(18,28,54,.35);
+}
+.btn-ghost:hover{transform:translateY(-3px);color:var(--tint-ink);box-shadow:var(--sh-inset), var(--sh-near), 0 18px 32px -12px rgba(18,28,54,.4)}
+.btn-ghost:hover svg{transform:translateY(3px)}
+.btn:active{transform:translateY(0)}
+
+/* 자동 업데이트 안내 — 눈에 띄게 */
+.update-note{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+  margin-top:clamp(20px,2.8vw,26px);
+}
+.note{
+  display:flex;gap:14px;
+  padding:18px 20px;border-radius:18px;
+  background:var(--glass-inner);
+  border:1px solid var(--glass-line);
+  box-shadow:inset 0 1px 0 var(--glass-hi);
+}
+.note-ico{
+  flex:none;width:38px;height:38px;border-radius:12px;
+  display:grid;place-items:center;
+  background:var(--glass-solid);
+  border:1px solid var(--glass-line);
+  color:var(--ink-2);
+}
+.note-ico svg{width:19px;height:19px}
+.note.on{background:var(--tint-soft);border-color:color-mix(in srgb, var(--tint) 30%, transparent)}
+.note.on .note-ico{color:var(--tint-ink);border-color:color-mix(in srgb, var(--tint) 30%, transparent)}
+.note h4{
+  margin:0 0 4px;font-size:14.5px;font-weight:800;letter-spacing:-.022em;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.note h4 .tag{
+  font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.1em;
+  padding:2px 7px;border-radius:5px;text-transform:uppercase;
+  background:var(--glass-solid);border:1px solid var(--glass-line);color:var(--ink-2);
+}
+.note.on h4 .tag{color:var(--tint-ink);border-color:color-mix(in srgb, var(--tint) 34%, transparent)}
+.note p{margin:0;font-size:14px;line-height:1.72;color:var(--ink-2)}
+
+/* ═══ 4. 이번 버전 설명 ═══════════════════════════════════════ */
+.whatsnew{display:grid;grid-template-columns:auto 1fr;gap:clamp(22px,3.4vw,40px);align-items:start}
+.wn-ver{
+  display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+  padding-right:clamp(22px,3.4vw,40px);
+  border-right:1px solid var(--hairline);
+}
+.wn-ver b{
+  font-size:clamp(30px,4vw,42px);font-weight:900;letter-spacing:-.05em;
+  line-height:1;color:var(--tint-ink);font-variant-numeric:tabular-nums;
+}
+.wn-ver span{
+  font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-2);
+  letter-spacing:.1em;font-variant-numeric:tabular-nums;
+}
+.wn-body p{
+  margin:0 0 16px;font-size:clamp(17px,1.9vw,20px);line-height:1.6;
+  letter-spacing:-.028em;font-weight:700;color:var(--ink);text-wrap:balance;
+}
+.wn-list{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.wn-list li{
+  position:relative;padding-left:24px;
+  font-size:15px;line-height:1.7;color:var(--ink-2);
+}
+.wn-list li::before{
+  content:"";position:absolute;left:6px;top:.72em;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--tint);opacity:.75;
+}
+
+/* ═══ 5. 설치 방법 ════════════════════════════════════════════ */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.step{
+  padding:22px 20px 24px;border-radius:20px;
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(20px) saturate(170%);
+  backdrop-filter:blur(20px) saturate(170%);
+  border:1px solid var(--glass-line);
+  box-shadow:var(--sh-inset), var(--sh-near), var(--sh-mid);
+  transition:transform .4s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
+}
+.step:hover{transform:translateY(-4px);box-shadow:var(--sh-inset), var(--sh-near), var(--sh-mid), var(--sh-far)}
+.step-n{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.2em;
+  color:var(--tint-ink);display:block;margin-bottom:12px;
+}
+.step p{margin:0;font-size:14.5px;line-height:1.68;color:var(--ink);font-weight:600;letter-spacing:-.018em}
+.step p em{font-style:normal;color:var(--ink-2);font-weight:400}
+.steps-label{
+  font-size:12.5px;font-weight:800;color:var(--ink-2);letter-spacing:.01em;
+  margin:0 0 12px;display:flex;align-items:center;gap:8px;
+}
+.steps-label:not(:first-child){margin-top:26px}
+.steps-label .n{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;
+  padding:3px 8px;border-radius:6px;background:var(--tint-soft);color:var(--tint-ink);
+}
+.steps.n3{grid-template-columns:repeat(3,1fr)}
+
+/* ═══ 6. 주요 기능 ════════════════════════════════════════════ */
+.feats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.feat{
+  padding:24px 20px 22px;border-radius:20px;
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(20px) saturate(170%);
+  backdrop-filter:blur(20px) saturate(170%);
+  border:1px solid var(--glass-line);
+  box-shadow:var(--sh-inset), var(--sh-near), var(--sh-mid);
+  transition:transform .4s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
+}
+.feat:hover{transform:translateY(-5px);box-shadow:var(--sh-inset), var(--sh-near), var(--sh-mid), var(--sh-far)}
+.feat-ico{
+  width:44px;height:44px;border-radius:14px;
+  display:grid;place-items:center;margin-bottom:16px;
+  background:var(--tint-soft);
+  border:1px solid color-mix(in srgb, var(--tint) 24%, transparent);
+  box-shadow:inset 0 1px 0 var(--glass-hi);
+  color:var(--tint-ink);
+}
+.feat-ico svg{width:22px;height:22px;display:block}
+.feat h3{margin:0 0 5px;font-size:15.5px;font-weight:800;letter-spacing:-.028em;line-height:1.3;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.feat p{margin:0;font-size:13.5px;line-height:1.65;color:var(--ink-2)}
+.feat-tag{
+  font-size:10px;font-weight:700;letter-spacing:.01em;
+  padding:2.5px 7px;border-radius:6px;
+  background:var(--tint-soft);color:var(--tint-ink);
+  white-space:nowrap;
+}
+
+/* ═══ 7. 앱 전용 가이드 ═══════════════════════════════════════ */
+.guide-lede{
+  margin:0 0 clamp(22px,3vw,28px);
+  font-size:16.5px;line-height:1.82;color:var(--ink-2);max-width:66ch;
+}
+.guide-lede strong{color:var(--ink);font-weight:800}
+
+.how{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:clamp(22px,3vw,28px)}
+.how-item{
+  display:flex;gap:14px;padding:20px;border-radius:18px;
+  background:var(--glass-inner);
+  border:1px solid var(--glass-line);
+  box-shadow:inset 0 1px 0 var(--glass-hi);
+}
+.how-ico{
+  flex:none;width:36px;height:36px;border-radius:11px;display:grid;place-items:center;
+  background:var(--glass-solid);border:1px solid var(--glass-line);color:var(--tint-ink);
+}
+.how-ico svg{width:19px;height:19px}
+.how-item h4{margin:0 0 4px;font-size:14.5px;font-weight:800;letter-spacing:-.024em}
+.how-item p{margin:0;font-size:13.8px;line-height:1.72;color:var(--ink-2)}
+
+.privacy{
+  display:flex;gap:14px;align-items:flex-start;
+  padding:18px 20px;border-radius:18px;margin-bottom:clamp(26px,3.4vw,34px);
+  background:var(--tint-soft);
+  border:1px solid color-mix(in srgb, var(--tint) 28%, transparent);
+  box-shadow:inset 0 1px 0 var(--glass-hi);
+}
+.privacy svg{width:20px;height:20px;flex:none;margin-top:2px;color:var(--tint-ink)}
+.privacy p{margin:0;font-size:14.2px;line-height:1.75;color:var(--ink-2)}
+/* 경고류(브랜드색과 분리된 시맨틱 앰버) — 실수로 알람 날아가는 걸 막는 안내라 성격이 달라
+   브랜드 틴트가 아니라 별도 색으로 구분 */
+.privacy.warn{
+  background:rgba(217,119,6,.10);
+  border-color:rgba(217,119,6,.32);
+}
+.privacy.warn svg{color:#B45309}
+@media (prefers-color-scheme:dark){.privacy.warn svg{color:#F0A73E}}
+:root[data-theme="dark"] .privacy.warn svg{color:#F0A73E}
+.privacy.warn strong{color:var(--ink)}
+.privacy strong{color:var(--ink);font-weight:800}
+
+.api-steps{display:grid;gap:10px;counter-reset:apistep}
+.api-step{
+  display:grid;grid-template-columns:76px 1fr;gap:18px;align-items:start;
+  padding:20px 22px;border-radius:18px;
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(18px) saturate(165%);
+  backdrop-filter:blur(18px) saturate(165%);
+  border:1px solid var(--glass-line);
+  box-shadow:var(--sh-inset), var(--sh-near);
+  transition:transform .3s ease, box-shadow .3s ease;
+}
+.api-step:hover{transform:translateX(4px);box-shadow:var(--sh-inset), var(--sh-near), var(--sh-mid)}
+.api-step .n{
+  font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.16em;
+  color:var(--tint-ink);padding-top:3px;white-space:nowrap;
+}
+.api-step h4{margin:0 0 5px;font-size:15.5px;font-weight:800;letter-spacing:-.028em}
+.api-step p{margin:0;font-size:14.2px;line-height:1.76;color:var(--ink-2)}
+.api-step strong{color:var(--ink);font-weight:700}
+.api-step a{color:var(--tint-ink);font-weight:700;text-underline-offset:3px}
+.api-step code{
+  font-family:var(--mono);font-size:12.5px;
+  background:var(--glass-solid);border:1px solid var(--glass-line);
+  padding:2px 7px;border-radius:6px;color:var(--ink);
+}
+
+/* ═══ 8. 버전별 업데이트 내역 (한 번에 전부 펼침) ═════════════ */
+.history{margin-top:clamp(56px,8vw,96px);border-radius:24px;overflow:hidden}
+.history summary{
+  list-style:none;cursor:pointer;
+  display:flex;align-items:center;gap:14px;
+  padding:24px clamp(24px,3.4vw,34px);
+  font-size:clamp(17px,2vw,20px);font-weight:800;letter-spacing:-.03em;
+  color:var(--ink);
+  transition:background .2s ease;
+}
+.history summary::-webkit-details-marker{display:none}
+.history summary:hover{background:var(--glass-inner)}
+.history summary .count{
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;
+  color:var(--ink-2);margin-left:auto;
+  font-variant-numeric:tabular-nums;
+}
+.history summary .chev{
+  flex:none;width:18px;height:18px;color:var(--ink-3);
+  transition:transform .3s ease;
+}
+.history[open] summary .chev{transform:rotate(180deg)}
+.history-body{
+  padding:4px clamp(24px,3.4vw,34px) clamp(26px,3.4vw,34px);
+  border-top:1px solid var(--hairline);
+}
+.rel{padding:24px 0;border-bottom:1px solid var(--hairline)}
+.rel:last-child{border-bottom:0;padding-bottom:4px}
+.rel-hdr{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.rel-hdr .v{
+  font-size:19px;font-weight:900;letter-spacing:-.035em;color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.rel-hdr .d{
+  font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;
+}
+.rel-hdr .now{
+  font-size:10.5px;font-weight:800;letter-spacing:.02em;
+  color:var(--tint-ink);background:var(--tint-soft);
+  border:1px solid color-mix(in srgb, var(--tint) 30%, transparent);
+  padding:2px 9px;border-radius:999px;
+}
+.rel ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.rel li{
+  position:relative;padding-left:20px;
+  font-size:14.5px;line-height:1.7;color:var(--ink-2);
+}
+.rel li::before{
+  content:"";position:absolute;left:5px;top:.74em;
+  width:5px;height:5px;border-radius:50%;
+  background:var(--ink-3);opacity:.55;
+}
+.rel.current li::before{background:var(--tint);opacity:.8}
+
+/* ver-entry* — 버전별 내역 카드. 전체 펼침(details) 하나로 둔다. */
+.ver-entry{padding:24px 0;border-bottom:1px solid var(--hairline)}
+.ver-entry:last-child{border-bottom:0;padding-bottom:4px}
+.ver-entry-hdr{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.ver-entry-hdr .ver-num{
+  font-size:19px;font-weight:900;letter-spacing:-.035em;color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.ver-entry-hdr .ver-dt{
+  font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--ink-2);
+  font-variant-numeric:tabular-nums;
+}
+.ver-entry ul{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.ver-entry li{
+  position:relative;padding-left:20px;
+  font-size:14.5px;line-height:1.7;color:var(--ink-2);
+}
+.ver-entry li::before{
+  content:"";position:absolute;left:5px;top:.74em;
+  width:5px;height:5px;border-radius:50%;
+  background:var(--ink-3);opacity:.55;
+}
+.ver-entry:first-child li::before{background:var(--tint);opacity:.8}
+
+/* ═══ 9. Footer ═══════════════════════════════════════════════ */
+.foot{
+  margin:clamp(48px,7vw,84px) auto clamp(40px,6vw,64px);
+  padding:30px 26px;border-radius:22px;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  flex-wrap:wrap;text-align:center;
+}
+.foot .dot{width:5px;height:5px;border-radius:50%;background:var(--tint);opacity:.7;flex:none}
+.foot p{margin:0;font-size:13px;color:var(--ink-2);letter-spacing:-.008em}
+
+/* ── Reveal ───────────────────────────────────────────────────── */
+.rise{opacity:0;transform:translateY(22px)}
+.rise.in{opacity:1;transform:none;transition:opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1)}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width:900px){
+  .feats{grid-template-columns:repeat(2,1fr)}
+  .steps,.steps.n3{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:760px){
+  body{font-size:16px}
+  .dock-nav{display:none}
+  .toggle{margin-left:auto}
+  .sec{padding-top:52px}
+  .panel{border-radius:24px}
+  .update-note{grid-template-columns:1fr}
+  .how{grid-template-columns:1fr}
+  .whatsnew{grid-template-columns:1fr;gap:20px}
+  .wn-ver{
+    flex-direction:row;align-items:baseline;gap:12px;
+    padding:0 0 18px;border-right:0;border-bottom:1px solid var(--hairline);
+  }
+  .btn{width:100%;justify-content:center;padding:16px 22px}
+  .api-step{grid-template-columns:1fr;gap:8px}
+  .api-step .n{padding-top:0}
+  /* 줄바꿈되면 세로 구분선이 어긋나므로 아예 세로 스택으로 전환 */
+  .release-strip{display:flex;flex-direction:column;width:100%}
+  .release-strip div{padding:13px 16px;flex-direction:row;justify-content:space-between;gap:16px}
+  .release-strip div + div{box-shadow:inset 0 1px 0 var(--hairline)}
+  .release-strip b{font-size:15.5px}
+}
+@media (max-width:440px){
+  .feats{grid-template-columns:1fr}
+  .steps,.steps.n3{grid-template-columns:1fr}
+  .btn{flex-wrap:wrap;row-gap:2px;font-size:15px}
+  .btn .sub{width:100%;text-align:center}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+  .rise{opacity:1;transform:none}
+  .lamp{display:none}
+}
+</style>
+
+<div class="wallpaper" aria-hidden="true"></div>
+<div class="lamp" aria-hidden="true"></div>
+
+<div class="shell">
+
+  <!-- ═══ Dock ═══ -->
+  <header class="dock glass wrap">
+    <a class="dock-mark" href="#top">
+      <img class="ico" src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgOTYgOTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgcm9sZT0iaW1nIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjE0IiB5MT0iNiIgeDI9IjgyIiB5Mj0iOTIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNCNUUzNkEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0QTk0MTgiLz48L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InMiIHgxPSI0OCIgeTE9IjQiIHgyPSI0OCIgeTI9IjU4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9Ii40MCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+PC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJiIiBjeD0iMCIgY3k9IjAiIHI9IjEiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjYgMjApIHJvdGF0ZSg1Mikgc2NhbGUoNTggNDYpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9Ii4zOCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+PC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJ3aCIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0ZGRkZGRiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0VFRjdFNCIvPjwvbGluZWFyR3JhZGllbnQ+CjxjbGlwUGF0aCBpZD0ia2JjIj48cmVjdCB4PSI0IiB5PSI0IiB3aWR0aD0iODgiIGhlaWdodD0iODgiIHJ4PSIyNSIvPjwvY2xpcFBhdGg+CjxyYWRpYWxHcmFkaWVudCBpZD0ia2JzIiBjeD0iMCIgY3k9IjAiIHI9IjEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiBncmFkaWVudFRyYW5zZm9ybT0idHJhbnNsYXRlKDcxLjQgNzIuOCkgc2NhbGUoMjIuNSkiPjxzdG9wIG9mZnNldD0iLjYyIiBzdG9wLWNvbG9yPSIjMDAwIiBzdG9wLW9wYWNpdHk9Ii4yNiIvPjxzdG9wIG9mZnNldD0iLjgiIHN0b3AtY29sb3I9IiMwMDAiIHN0b3Atb3BhY2l0eT0iLjExIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDAwIiBzdG9wLW9wYWNpdHk9IjAiLz48L3JhZGlhbEdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9ImtiZiIgeDE9IjcxLjQiIHkxPSI1NC4wNCIgeDI9IjcxLjQiIHkyPSI4OC43NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzJFNkEwRSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzFDNDUwOCIvPjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0ia2JyIiB4MT0iNTkiIHkxPSI1OSIgeDI9Ijg0IiB5Mj0iODQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmYiIHN0b3Atb3BhY2l0eT0iLjk3Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9Ii43NCIvPjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0ia2JnIiB4MT0iNzEuNCIgeTE9IjU2Ljc5IiB4Mj0iNzEuNCIgeTI9Ijg2LjAxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9Ii4zMiIvPjxzdG9wIG9mZnNldD0iLjU4IiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9IjAiLz48L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9Ijg4IiBoZWlnaHQ9Ijg4IiByeD0iMjUiIGZpbGw9InVybCgjZykiLz48cmVjdCB4PSI0IiB5PSI0IiB3aWR0aD0iODgiIGhlaWdodD0iODgiIHJ4PSIyNSIgZmlsbD0idXJsKCNiKSIvPjxwYXRoIGQ9Ik00IDI5QzQgMTUuMiAxNS4yIDQgMjkgNGgzOGMxMy44IDAgMjUgMTEuMiAyNSAyNXY5Yy0xNiA4LTMwLjcgMTEuNi00NCAxMS42UzIyLjUgNDUuNCA0IDM0LjZWMjlaIiBmaWxsPSJ1cmwoI3MpIi8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC45IDEuMSkiIGZpbGw9IiMxRjRBMEUiIGZpbGwtb3BhY2l0eT0iLjI2Ij48cGF0aCBkPSJNMzAgMTJoMTZ2MzRoMTJMMzggNzAgMTggNDZoMTJaIiBzdHJva2U9IiMxRjRBMEUiIHN0cm9rZS1vcGFjaXR5PSIuMjYiIHN0cm9rZS13aWR0aD0iMy4yIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHJlY3QgeD0iMTQiIHk9Ijc2IiB3aWR0aD0iMzgiIGhlaWdodD0iNiIgcng9IjMiLz48L2c+PGcgZmlsbD0idXJsKCN3aCkiPjxwYXRoIGQ9Ik0zMCAxMmgxNnYzNGgxMkwzOCA3MCAxOCA0NmgxMloiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIzLjIiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cmVjdCB4PSIxNCIgeT0iNzYiIHdpZHRoPSIzOCIgaGVpZ2h0PSI2IiByeD0iMyIvPjwvZz48cGF0aCBkPSJNMzggMjFWNDkiIHN0cm9rZT0iIzNFN0YxOCIgc3Ryb2tlLXdpZHRoPSIyLjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWRhc2hhcnJheT0iMi44IDIuOCIgZmlsbD0ibm9uZSIvPjxyZWN0IHg9IjM0LjIiIHk9IjE0IiB3aWR0aD0iNy42IiBoZWlnaHQ9IjQuNiIgcng9IjIuMyIgZmlsbD0iIzNFN0YxOCIvPjxnIGNsaXAtcGF0aD0idXJsKCNrYmMpIj48Y2lyY2xlIGN4PSI3MS40IiBjeT0iNzIuOCIgcj0iMjIuNSIgZmlsbD0idXJsKCNrYnMpIi8+PC9nPjxjaXJjbGUgY3g9IjcxLjQiIGN5PSI3MS40IiByPSIxNS45ODUiIGZpbGw9InVybCgja2JmKSIgc3Ryb2tlPSJ1cmwoI2ticikiIHN0cm9rZS13aWR0aD0iMi43NSIvPjxjaXJjbGUgY3g9IjcxLjQiIGN5PSI3MS40IiByPSIxNC42MSIgZmlsbD0idXJsKCNrYmcpIi8+PGNpcmNsZSBjeD0iNzEuNCIgY3k9IjcxLjQiIHI9IjE3LjcyIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS1vcGFjaXR5PSIuMTIiIHN0cm9rZS13aWR0aD0iLjciLz48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1vcGFjaXR5PSIuOTciIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNjcuMzUgNjUuMTVWNzcuNjUiLz48cGF0aCBkPSJNNzUuNDUgNjUuMTVMNjguNjUgNzEuNEw3NS40NSA3Ny42NSIvPjwvZz48cmVjdCB4PSI0Ljc1IiB5PSI0Ljc1IiB3aWR0aD0iODYuNSIgaGVpZ2h0PSI4Ni41IiByeD0iMjQuMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4zNCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48cmVjdCB4PSI0LjI1IiB5PSI0LjI1IiB3aWR0aD0iODcuNSIgaGVpZ2h0PSI4Ny41IiByeD0iMjQuNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLW9wYWNpdHk9Ii4xNiIgc3Ryb2tlLXdpZHRoPSIuNSIvPjwvc3ZnPg==" alt="K-Ext 아이콘" draggable="false">
+      K&nbsp;Ext
+    </a>
+    <nav class="dock-nav" aria-label="페이지 바로가기">
+      <a href="#download">다운로드</a>
+      <a href="#whatsnew">이번 버전</a>
+      <a href="#install">설치 방법</a>
+      <a href="#howto">쓰는 법</a>
+      <a href="#features">이런 걸 해 줍니다</a>
+      <a href="#history">업데이트 내역</a>
+    </nav>
+    <button class="toggle" id="themeToggle" type="button" aria-label="밝은 테마와 어두운 테마 전환">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+  </header>
+
+  <!-- ═══ 로고 + 앱 이름 + 버전 ═══ -->
+  <section class="masthead wrap" id="top">
+    <div class="mark-well rise">
+      <div class="mark-badge">
+        <img class="ico" src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgOTYgOTYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgcm9sZT0iaW1nIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjE0IiB5MT0iNiIgeDI9IjgyIiB5Mj0iOTIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNCNUUzNkEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0QTk0MTgiLz48L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InMiIHgxPSI0OCIgeTE9IjQiIHgyPSI0OCIgeTI9IjU4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9Ii40MCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+PC9saW5lYXJHcmFkaWVudD4KPHJhZGlhbEdyYWRpZW50IGlkPSJiIiBjeD0iMCIgY3k9IjAiIHI9IjEiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjYgMjApIHJvdGF0ZSg1Mikgc2NhbGUoNTggNDYpIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9Ii4zOCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+PC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJ3aCIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI0ZGRkZGRiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0VFRjdFNCIvPjwvbGluZWFyR3JhZGllbnQ+CjxjbGlwUGF0aCBpZD0ia2JjIj48cmVjdCB4PSI0IiB5PSI0IiB3aWR0aD0iODgiIGhlaWdodD0iODgiIHJ4PSIyNSIvPjwvY2xpcFBhdGg+CjxyYWRpYWxHcmFkaWVudCBpZD0ia2JzIiBjeD0iMCIgY3k9IjAiIHI9IjEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiBncmFkaWVudFRyYW5zZm9ybT0idHJhbnNsYXRlKDcxLjQgNzIuOCkgc2NhbGUoMjIuNSkiPjxzdG9wIG9mZnNldD0iLjYyIiBzdG9wLWNvbG9yPSIjMDAwIiBzdG9wLW9wYWNpdHk9Ii4yNiIvPjxzdG9wIG9mZnNldD0iLjgiIHN0b3AtY29sb3I9IiMwMDAiIHN0b3Atb3BhY2l0eT0iLjExIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDAwIiBzdG9wLW9wYWNpdHk9IjAiLz48L3JhZGlhbEdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9ImtiZiIgeDE9IjcxLjQiIHkxPSI1NC4wNCIgeDI9IjcxLjQiIHkyPSI4OC43NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzJFNkEwRSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzFDNDUwOCIvPjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0ia2JyIiB4MT0iNTkiIHkxPSI1OSIgeDI9Ijg0IiB5Mj0iODQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmYiIHN0b3Atb3BhY2l0eT0iLjk3Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9Ii43NCIvPjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0ia2JnIiB4MT0iNzEuNCIgeTE9IjU2Ljc5IiB4Mj0iNzEuNCIgeTI9Ijg2LjAxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9Ii4zMiIvPjxzdG9wIG9mZnNldD0iLjU4IiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9IjAiLz48L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9Ijg4IiBoZWlnaHQ9Ijg4IiByeD0iMjUiIGZpbGw9InVybCgjZykiLz48cmVjdCB4PSI0IiB5PSI0IiB3aWR0aD0iODgiIGhlaWdodD0iODgiIHJ4PSIyNSIgZmlsbD0idXJsKCNiKSIvPjxwYXRoIGQ9Ik00IDI5QzQgMTUuMiAxNS4yIDQgMjkgNGgzOGMxMy44IDAgMjUgMTEuMiAyNSAyNXY5Yy0xNiA4LTMwLjcgMTEuNi00NCAxMS42UzIyLjUgNDUuNCA0IDM0LjZWMjlaIiBmaWxsPSJ1cmwoI3MpIi8+PGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC45IDEuMSkiIGZpbGw9IiMxRjRBMEUiIGZpbGwtb3BhY2l0eT0iLjI2Ij48cGF0aCBkPSJNMzAgMTJoMTZ2MzRoMTJMMzggNzAgMTggNDZoMTJaIiBzdHJva2U9IiMxRjRBMEUiIHN0cm9rZS1vcGFjaXR5PSIuMjYiIHN0cm9rZS13aWR0aD0iMy4yIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHJlY3QgeD0iMTQiIHk9Ijc2IiB3aWR0aD0iMzgiIGhlaWdodD0iNiIgcng9IjMiLz48L2c+PGcgZmlsbD0idXJsKCN3aCkiPjxwYXRoIGQ9Ik0zMCAxMmgxNnYzNGgxMkwzOCA3MCAxOCA0NmgxMloiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIzLjIiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48cmVjdCB4PSIxNCIgeT0iNzYiIHdpZHRoPSIzOCIgaGVpZ2h0PSI2IiByeD0iMyIvPjwvZz48cGF0aCBkPSJNMzggMjFWNDkiIHN0cm9rZT0iIzNFN0YxOCIgc3Ryb2tlLXdpZHRoPSIyLjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWRhc2hhcnJheT0iMi44IDIuOCIgZmlsbD0ibm9uZSIvPjxyZWN0IHg9IjM0LjIiIHk9IjE0IiB3aWR0aD0iNy42IiBoZWlnaHQ9IjQuNiIgcng9IjIuMyIgZmlsbD0iIzNFN0YxOCIvPjxnIGNsaXAtcGF0aD0idXJsKCNrYmMpIj48Y2lyY2xlIGN4PSI3MS40IiBjeT0iNzIuOCIgcj0iMjIuNSIgZmlsbD0idXJsKCNrYnMpIi8+PC9nPjxjaXJjbGUgY3g9IjcxLjQiIGN5PSI3MS40IiByPSIxNS45ODUiIGZpbGw9InVybCgja2JmKSIgc3Ryb2tlPSJ1cmwoI2ticikiIHN0cm9rZS13aWR0aD0iMi43NSIvPjxjaXJjbGUgY3g9IjcxLjQiIGN5PSI3MS40IiByPSIxNC42MSIgZmlsbD0idXJsKCNrYmcpIi8+PGNpcmNsZSBjeD0iNzEuNCIgY3k9IjcxLjQiIHI9IjE3LjcyIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS1vcGFjaXR5PSIuMTIiIHN0cm9rZS13aWR0aD0iLjciLz48ZyBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1vcGFjaXR5PSIuOTciIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNjcuMzUgNjUuMTVWNzcuNjUiLz48cGF0aCBkPSJNNzUuNDUgNjUuMTVMNjguNjUgNzEuNEw3NS40NSA3Ny42NSIvPjwvZz48cmVjdCB4PSI0Ljc1IiB5PSI0Ljc1IiB3aWR0aD0iODYuNSIgaGVpZ2h0PSI4Ni41IiByeD0iMjQuMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4zNCIgc3Ryb2tlLXdpZHRoPSIxLjUiLz48cmVjdCB4PSI0LjI1IiB5PSI0LjI1IiB3aWR0aD0iODcuNSIgaGVpZ2h0PSI4Ny41IiByeD0iMjQuNzUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLW9wYWNpdHk9Ii4xNiIgc3Ryb2tlLXdpZHRoPSIuNSIvPjwvc3ZnPg==" alt="K-Ext 아이콘" draggable="false">
+      </div>
+    </div>
+
+    <p class="eyebrow rise">K · S E R I E S</p>
+    <h1 class="rise">K<span>-Ext</span></h1>
+    <p class="tagline rise">브라우저 확장 프로그램을 설치하고, 최신으로 지켜 드립니다</p>
+    <p class="lede rise">받으신 확장 프로그램 파일을<br>창 안에 끌어다 놓기만 하시면 됩니다.<br>압축을 푸실 필요도, 어느 폴더에 넣는지 아실 필요도 없습니다.<br>쓰고 계신 확장을 찾아 새 버전으로 바꿔 넣고,<br>바뀐 것이 마음에 안 드시면 전으로 되돌립니다.</p>
+
+    <div class="release-strip glass rise">
+      <div><span class="k">현재 버전</span><b class="hot" id="latest-ver">v0.1.0</b></div>
+      <div><span class="k">배포일</span><b id="latest-date">2026-09-20</b></div>
+      <div><span class="k">지원 환경</span><b>Windows 64bit</b></div>
+    </div>
+  </section>
+
+  <main>
+
+    <!-- ═══ 01 다운로드 ═══ -->
+    <section class="sec wrap" id="download">
+      <div class="sec-head rise">
+        <span class="sec-num">01</span>
+        <h2>다운로드</h2>
+        <span class="rule"></span>
+        <span class="pill">Windows 64bit</span>
+      </div>
+
+      <div class="panel glass rise">
+        <div class="dl-row">
+          <a class="btn btn-primary" id="dl-link" href="https://github.com/regina25846-code/K-Ext/releases/latest/download/K-Ext.Setup.0.1.0.exe" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 20h16"></path></svg>
+            설치형 다운로드
+            <span class="sub">K-Ext.Setup.0.1.0.exe</span>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/regina25846-code/K-Ext/releases/latest/download/K-Ext-0.1.0-portable.exe" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+            포터블 다운로드
+            <span class="sub">K-Ext-0.1.0-portable.exe</span>
+          </a>
+        </div>
+
+        <div class="update-note">
+          <div class="note on">
+            <div class="note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>
+            </div>
+            <div>
+              <h4>설치형 <span class="tag">자동 업데이트</span></h4>
+              <p>새 버전이 나오면 프로그램이 스스로 받아 둡니다. 준비가 끝나면 창 위쪽에 알림 띠가 뜨고, 작업 표시줄 오른쪽 아이콘을 눌러도 바로 설치하실 수 있습니다. 이 페이지에 다시 오지 않으셔도 됩니다.</p>
+            </div>
+          </div>
+          <div class="note">
+            <div class="note-ico">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v5H4z"></path><path d="M6 9v11h12V9"></path><path d="M10 13h4"></path></svg>
+            </div>
+            <div>
+              <h4>포터블 <span class="tag">직접 받기</span></h4>
+              <p>설치 없이 파일 하나로 바로 실행됩니다. 새 버전은 이 페이지에서 다시 받으시면 됩니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 02 이번 버전 ═══ -->
+    <section class="sec wrap" id="whatsnew">
+      <div class="sec-head rise">
+        <span class="sec-num">02</span>
+        <h2>이번 버전</h2>
+        <span class="rule"></span>
+      </div>
+
+      <div class="panel glass rise">
+        <div class="whatsnew">
+          <div class="wn-ver">
+            <b id="wn-ver">v0.1.0</b>
+            <span id="wn-date">2026-09-20</span>
+          </div>
+          <div class="wn-body">
+            <p id="latest-changelog">첫 공개 버전</p>
+            <ul class="wn-list">
+              <li>받으신 확장프로그램 zip 파일을 끌어다 놓으면 쓰고 계신 확장을 찾아 새 버전으로 바꿔 넣습니다</li>
+              <li>바꾸기 전에 어느 확장이 어느 버전으로 바뀌는지, 어떤 파일이 늘고 주는지 먼저 보여드립니다</li>
+              <li>바꾼 뒤 마음에 안 드시면 바로 전 상태로 되돌리실 수 있습니다</li>
+              <li>아직 한 번도 설치한 적 없는 확장은 새 자리를 만들어 처음부터 넣어 드립니다</li>
+              <li>크롬 · 웨일 · 엣지 · 브레이브에서 쓰실 수 있습니다</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 03 설치 방법 ═══ -->
+    <section class="sec wrap" id="install">
+      <div class="sec-head rise">
+        <span class="sec-num">03</span>
+        <h2>설치 방법</h2>
+        <span class="rule"></span>
+        <span class="pill">약 1분</span>
+      </div>
+
+      <div class="steps n3 rise">
+        <div class="step">
+          <span class="step-n">STEP 1</span>
+          <p>설치형과 포터블 중 하나를 받습니다<br><em>설치형은 새 버전이 나오면 알아서 받아 둡니다. 포터블은 파일 하나로 바로 실행됩니다.</em></p>
+        </div>
+        <div class="step">
+          <span class="step-n">STEP 2</span>
+          <p>Windows 안내 창이 뜨면<br><em>“추가 정보” → “실행”을 누르시면 계속 진행됩니다.</em></p>
+        </div>
+        <div class="step">
+          <span class="step-n">STEP 3</span>
+          <p>실행하면 바로 쓰실 수 있습니다<br><em>따로 등록하거나 입력하실 것은 없습니다.</em></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 04 쓰는 법 ═══ -->
+    <section class="sec wrap" id="howto">
+      <div class="sec-head rise">
+        <span class="sec-num">04</span>
+        <h2>쓰는 법</h2>
+        <span class="rule"></span>
+        <span class="pill">3단계</span>
+      </div>
+
+      <div class="panel glass rise">
+        <p class="guide-lede" style="margin-bottom:0">
+          받으신 <strong>파일을 그대로</strong> 쓰시면 됩니다 — 압축은 풀지 않으셔도 됩니다.
+          <strong>크롬 · 웨일 · 엣지 · 브레이브</strong>에서 쓰실 수 있고, 브라우저는 처음 한 번만 고르시면 다음부터 묻지 않습니다.
+        </p>
+      </div>
+
+      <div class="steps n3 rise">
+        <div class="step">
+          <span class="step-n">STEP 1</span>
+          <p>zip 파일을 창 안에 끌어다 놓습니다<br><em>파일을 고르는 버튼으로 찾으셔도 됩니다.</em></p>
+        </div>
+        <div class="step">
+          <span class="step-n">STEP 2</span>
+          <p>무엇이 어떻게 바뀌는지 확인합니다<br><em>어느 확장이 어느 버전으로 바뀌는지 보여 드립니다. 보시고 넣기를 누르시면 됩니다.</em></p>
+        </div>
+        <div class="step">
+          <span class="step-n">STEP 3</span>
+          <p>브라우저에서 한 번 새로 고칩니다<br><em>어느 주소로 가서 어느 버튼을 누르면 되는지 화면이 그대로 알려 드립니다.</em></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 05 이런 걸 해 줍니다 ═══ -->
+    <section class="sec wrap" id="features">
+      <div class="sec-head rise">
+        <span class="sec-num">05</span>
+        <h2>이런 걸 해 줍니다</h2>
+        <span class="rule"></span>
+      </div>
+
+      <div class="feats rise">
+        <div class="feat">
+          <div class="feat-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13V7a2 2 0 0 0-2-2h-5l-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7"></path><path d="M17 15v6"></path><path d="M14 18h6"></path></svg>
+          </div>
+          <h3>압축은 그대로</h3>
+          <p>zip 을 푸실 필요가 없습니다</p>
+        </div>
+        <div class="feat">
+          <div class="feat-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          </div>
+          <h3>쓰시던 자리를 찾습니다</h3>
+          <p>어느 폴더인지 모르셔도 됩니다</p>
+        </div>
+        <div class="feat">
+          <div class="feat-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M4 12h10"></path><path d="M4 17h7"></path><path d="M17 14l3 3-3 3"></path></svg>
+          </div>
+          <h3>먼저 보여 드립니다</h3>
+          <p>바뀌는 것을 확인하고 넣습니다</p>
+        </div>
+        <div class="feat">
+          <div class="feat-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.64-6.36"></path><path d="M3 3v6h6"></path></svg>
+          </div>
+          <h3>되돌릴 수 있습니다</h3>
+          <p>전에 넣은 상태로 돌아갑니다</p>
+        </div>
+        <div class="feat">
+          <div class="feat-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+          </div>
+          <h3>처음 설치도 됩니다</h3>
+          <p>새 확장은 자리를 만들어 넣습니다</p>
+        </div>
+        <div class="feat">
+          <div class="feat-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"></path><path d="M21 3v6h-6"></path></svg>
+          </div>
+          <h3>스스로 최신으로</h3>
+          <p>새 버전이 나오면 알려 드립니다</p>
+        </div>
+        <div class="feat">
+          <div class="feat-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M6 7l1 13h10l1-13"></path><path d="M9 7V4h6v3"></path></svg>
+          </div>
+          <h3>옛 파일은 휴지통으로</h3>
+          <p>지운 것도 다시 꺼내실 수 있습니다</p>
+        </div>
+        <div class="feat">
+          <div class="feat-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h8"></path></svg>
+          </div>
+          <h3>주소는 대신 복사</h3>
+          <p>다음에 할 일을 짚어 드립니다</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ 06 버전별 업데이트 내역 ═══ -->
+    <details class="history glass wrap rise" id="history">
+      <summary>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+        버전별 업데이트 내역
+        <span class="count">v0.1.0 · 1개 버전</span>
+      </summary>
+      <div class="history-body">
+
+        <div class="ver-entry">
+          <div class="ver-entry-hdr"><span class="ver-num">v0.1.0</span><span class="ver-dt">2026-09-20</span></div>
+          <div style="font-weight:700;font-size:15px;margin-bottom:6px;">첫 공개 버전</div>
+          <ul>
+            <li>받으신 확장프로그램 zip 파일을 끌어다 놓으면 쓰고 계신 확장을 찾아 새 버전으로 바꿔 넣습니다</li>
+            <li>바꾸기 전에 어느 확장이 어느 버전으로 바뀌는지, 어떤 파일이 늘고 주는지 먼저 보여드립니다</li>
+            <li>바꾼 뒤 마음에 안 드시면 바로 전 상태로 되돌리실 수 있습니다</li>
+            <li>아직 한 번도 설치한 적 없는 확장은 새 자리를 만들어 처음부터 넣어 드립니다</li>
+            <li>크롬 · 웨일 · 엣지 · 브레이브에서 쓰실 수 있습니다</li>
+          </ul>
+        </div>
+
+      </div>
+    </details>
+
+  </main>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="foot glass wrap rise">
+    <span class="dot" aria-hidden="true"></span>
+    <p>K-시리즈 · 직접 기획하고, 직접 만들고, 직접 씀 · by KrisB, 2026</p>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var root = document.documentElement;
+
+  /* theme toggle — stamps data-theme, overriding prefers-color-scheme both ways */
+  var btn = document.getElementById('themeToggle');
+  btn.addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme');
+    if(!cur){
+      cur = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    root.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+  });
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* scroll reveal */
+  var items = document.querySelectorAll('.rise');
+  if(reduce || !('IntersectionObserver' in window)){
+    items.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:.06});
+
+    var head = document.querySelectorAll('.masthead .rise');
+    head.forEach(function(el, i){
+      el.style.transitionDelay = (i * 100) + 'ms';
+      setTimeout(function(){ el.classList.add('in'); }, 60);
+    });
+    items.forEach(function(el){ if(!el.closest('.masthead')) io.observe(el); });
+  }
+
+  /* studio lamp follows the pointer on fine-pointer devices */
+  if(!reduce && window.matchMedia('(pointer: fine)').matches){
+    var lamp = document.querySelector('.lamp');
+    var lx = window.innerWidth/2, ly = window.innerHeight*0.3, tx = lx, ty = ly, raf = 0;
+    lamp.style.opacity = '1';
+    lamp.style.transform = 'translate3d(' + lx + 'px,' + ly + 'px,0)';
+    window.addEventListener('pointermove', function(e){
+      tx = e.clientX; ty = e.clientY;
+      if(!raf) raf = requestAnimationFrame(tick);
+    }, {passive:true});
+    function tick(){
+      lx += (tx - lx) * 0.08;
+      ly += (ty - ly) * 0.08;
+      lamp.style.transform = 'translate3d(' + lx.toFixed(1) + 'px,' + ly.toFixed(1) + 'px,0)';
+      raf = (Math.abs(tx-lx) > 0.5 || Math.abs(ty-ly) > 0.5) ? requestAnimationFrame(tick) : 0;
+    }
+  }
+})();
+</script>
+
+<!-- K-Ext 도 별도 배포 자동화(version.json)가 없어 위 버전 정보는 전부 정적 텍스트다.
+     버전 올릴 때 latest-ver / latest-date / wn-ver / wn-date / 다운로드 두 링크 / history 맨 위 항목을 손으로 갱신한다. -->
+
+<!-- ── 모바일 다운로드 차단 (PC 전용 프로그램, 2026-08-27 조사+구현) ── -->
+<style>
+.pc-only-blocked{
+  opacity:.45;
+  filter:grayscale(.35);
+  pointer-events:none;
+  cursor:not-allowed;
+}
+.pc-only-note{
+  display:flex;align-items:center;gap:7px;
+  margin-top:10px;
+  font-size:13px;font-weight:700;letter-spacing:-.01em;
+  color:var(--ink-2,#6b7280);
+}
+.pc-only-note svg{width:15px;height:15px;flex:none;opacity:.85}
+</style>
+<script>
+(function(){
+  function isMobileDevice(){
+    var ua = (navigator.userAgent || '');
+    var uaMobile = /Android|iPhone|iPod|Windows Phone|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    var uaTablet = /iPad|Tablet/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+    var w = Math.min(window.innerWidth || 9999, (window.screen && window.screen.width) || 9999);
+    var touch = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
+    var narrowTouch = w <= 768 && touch;
+    return uaMobile || uaTablet || narrowTouch;
+  }
+  function blockButton(btn){
+    if (!btn || btn.classList.contains('pc-only-blocked')) return;
+    btn.classList.add('pc-only-blocked');
+    btn.setAttribute('aria-disabled', 'true');
+    btn.setAttribute('tabindex', '-1');
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+    var note = document.createElement('div');
+    note.className = 'pc-only-note';
+    note.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>PC 전용 프로그램입니다 · PC에서 다운로드해주세요';
+    btn.insertAdjacentElement('afterend', note);
+  }
+  function init(){
+    if (!isMobileDevice()) return;
+    document.querySelectorAll('a.btn-primary, a.dl').forEach(blockButton);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+</body>
+</html>
