@@ -365,9 +365,11 @@ img{max-width:100%}
 .panel{padding:clamp(26px,3.6vw,40px) clamp(24px,3.6vw,42px);border-radius:28px}
 
 /* ═══ 3. 다운로드 ═════════════════════════════════════════════ */
-.dl-row{display:flex;flex-wrap:wrap;gap:14px}
+/* 버튼 줄은 아래 설명 상자(.update-note)와 같은 2열 격자를 쓴다 — flex 로 두면 버튼이
+   글자 길이대로 넓어져 두 번째 버튼의 왼쪽 끝이 아래 상자와 어긋난다(형 지적, 1280 에서 96px). */
+.dl-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .btn{
-  display:inline-flex;align-items:center;gap:12px;
+  display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap;
   text-decoration:none;
   font-size:16px;font-weight:800;letter-spacing:-.022em;
   padding:17px 28px;border-radius:16px;
@@ -377,6 +379,8 @@ img{max-width:100%}
 .btn .sub{
   font-family:var(--mono);font-size:11px;font-weight:700;opacity:.72;
   letter-spacing:.04em;font-variant-numeric:tabular-nums;
+  /* 칸이 좁아지면 파일 이름을 통째로 아랫줄로 내린다 — 중간에서 끊기면 읽기 어렵다 */
+  white-space:nowrap;
 }
 .btn-primary{
   color:#fff;
@@ -696,6 +700,7 @@ img{max-width:100%}
   .sec{padding-top:52px}
   .panel{border-radius:24px}
   .update-note{grid-template-columns:1fr}
+  .dl-row{grid-template-columns:1fr}
   .how{grid-template-columns:1fr}
   .whatsnew{grid-template-columns:1fr;gap:20px}
   .wn-ver{
